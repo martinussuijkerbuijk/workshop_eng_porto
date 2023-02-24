@@ -138,6 +138,15 @@ def mutate_generation(generation:pd.DataFrame, parents:pd.DataFrame):
         
 
 def generate_ss_from_file(path:str, step_x=3., shape=(20,20)):
+    
+    # First check if collection exists, if not create collection for objects
+    if bpy.context.scene.collection.children.get("ShapeCollection"):
+        collection = bpy.context.scene.collection.children.get("ShapeCollection")
+    else:
+        collection = bpy.data.collections.new("ShapeCollection")
+        bpy.context.scene.collection.children.link(collection)
+    
+    
     df = pd.read_pickle(path)
     matrix = df.to_numpy()
     matrix = matrix[:,1:]
@@ -155,6 +164,12 @@ def generate_ss_from_file(path:str, step_x=3., shape=(20,20)):
                     shape=(shape)
                 )
         sshape.update_bpy_mesh(x, y, z, obj)
+    
+        # move object to new collection
+        if obj.users_collection[0] == collection:
+            continue
+        else:
+            collection.objects.link(obj)
 #        obj.location.x = location_start_x
 #        location_start_x += step_x
         
@@ -284,4 +299,4 @@ def run(from_file=False):
 
 # Run the script with flag to create from file or not
 # The first run will instaal and import the dependencies
-run(from_file=False)
+run(from_file=True)
